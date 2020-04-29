@@ -7,11 +7,12 @@ r = requests.get(f"http://api.steampowered.com/ISteamApps/GetAppList/v0002/?key=
 
 games = r.json()["applist"]["apps"]
 
+
 #store.steampowered.com/appreviews/<appid>?json=1
 #https://store.steampowered.com/api/appdetails?appids=<appid>
+#(pd.DataFrame.from_dict(games)).to_csv("games_fresh")
 
 df = pd.DataFrame.from_dict(games)
-
 dfCopy = df
 testDF = df.tail(100)
 
@@ -136,4 +137,5 @@ def extract(df, csvname):
             continue
 
 
-extract(df, "fullSteam")
+#extract(df, "fullSteam")
+extract(testDF, "testDF")
