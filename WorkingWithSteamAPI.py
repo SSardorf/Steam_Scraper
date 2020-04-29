@@ -137,5 +137,5 @@ def extract(df, csvname):
             continue
 
 
-#extract(df, "fullSteam")
-extract(testDF, "testDF")
+extract(df, "fullSteam")
+#extract(testDF, "testDF")
