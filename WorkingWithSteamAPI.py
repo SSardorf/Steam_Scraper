@@ -1,6 +1,8 @@
 import requests
 import pandas as pd
 import sys
+import math
+import time
 pd.options.mode.chained_assignment = None  # default='warn'
 api_key = 0
 r = requests.get(f"http://api.steampowered.com/ISteamApps/GetAppList/v0002/?key={api_key}&format=json")
@@ -12,9 +14,10 @@ games = r.json()["applist"]["apps"]
 #https://store.steampowered.com/api/appdetails?appids=<appid>
 #(pd.DataFrame.from_dict(games)).to_csv("games_fresh")
 
-df = pd.DataFrame.from_dict(games)
-dfCopy = df
-testDF = df.tail(100)
+#df = pd.DataFrame.from_dict(games)
+#dfCopy = df
+#testDF = df.tail(10)
+df = pd.read_csv("fullSteamV4.csv")
 
 
 
@@ -118,24 +121,31 @@ def addInfo(df, index, dictInfo):
 
     #df[index]
 
-def extract(df, csvname):
+def extract(csvname):
     i = 1
     for index, row in df.iterrows():
-        print(str(i) + " out of " + str(len(df)))
-        i = i+1
-        try:
-            review_info = getReviewInfo(row["appid"])
-            game_info = getGameInfo(row["appid"])
-            addInfo(df, index, game_info)
-            if review_info is not None:
-                addInfo(df, index, review_info)
+        if math.isnan(df.at[index, "success"]):
+            print(str(index) + " out of " + str(len(df)))
+            i = i+1
+            if i % 200 == 0:
+                print("Waiting 1,5 minutes! (API Throttle Limit)")
+                time.sleep(90)
+            try:
+                review_info = getReviewInfo(row["appid"])
+                game_info = getGameInfo(row["appid"])
+                addInfo(df, index, game_info)
+                if review_info is not None:
+                    addInfo(df, index, review_info)
 
-            df.to_csv(csvname+".csv")
+                if i % 20 == 0:
+                    df.to_csv(csvname+".csv", index = False)
 
-        except:
-            print(sys.exc_info()[0])
-            continue
+            except:
+                print(sys.exc_info()[0])
+                continue
+    df.to_csv(csvname + ".csv", index = False)
 
 
-extract(df, "fullSteam")
-#extract(testDF, "testDF")
+#extract(df, "fullSteamV4")
+#extract(testDF, "newTest")
+
